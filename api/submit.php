@@ -14,6 +14,7 @@ header('Content-Type: application/json; charset=utf-8');
 define('ADMIN_EMAIL', 'sarvocchmicrocare@gmail.com');
 define('SITE_NAME', 'Sarvocch Microcare Foundation');
 define('DATA_DIR', __DIR__ . '/../data');
+define('DB_FILE', DATA_DIR . '/sarvocch.db');
 define('SUBMISSIONS_FILE', DATA_DIR . '/submissions.json');
 
 // Official WhatsApp Business Number for Customers to chat with
@@ -164,12 +165,104 @@ if (!empty($errors)) {
 }
 
 // ==========================================================
-// 3. PERSIST SUBMISSION TO DATA LOG
+// 3. PERSIST SUBMISSION TO SQLITE DATABASE & JSON BACKUP
 // ==========================================================
 if (!is_dir(DATA_DIR)) {
     @mkdir(DATA_DIR, 0755, true);
 }
 
+// 3.1 SQLite Database Insertion
+try {
+    if (class_exists('PDO')) {
+        $pdo = new PDO('sqlite:' . DB_FILE);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Ensure tables exist
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS loan_enquiries (
+                id TEXT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                email TEXT,
+                state TEXT NOT NULL,
+                product TEXT,
+                amount REAL,
+                message TEXT,
+                ip_address TEXT,
+                status TEXT DEFAULT 'NEW'
+            );
+            CREATE TABLE IF NOT EXISTS grievances (
+                id TEXT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                category TEXT NOT NULL,
+                details TEXT NOT NULL,
+                ip_address TEXT,
+                status TEXT DEFAULT 'OPEN'
+            );
+            CREATE TABLE IF NOT EXISTS contacts (
+                id TEXT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                message TEXT NOT NULL,
+                ip_address TEXT,
+                status TEXT DEFAULT 'UNREAD'
+            );
+        ");
+
+        if ($action === 'loan_enquiry') {
+            $stmt = $pdo->prepare("
+                INSERT INTO loan_enquiries (id, name, phone, email, state, product, amount, message, ip_address)
+                VALUES (:id, :name, :phone, :email, :state, :product, :amount, :message, :ip)
+            ");
+            $stmt->execute([
+                ':id'      => $payload['id'],
+                ':name'    => $payload['name'] ?? '',
+                ':phone'   => $payload['phone'] ?? '',
+                ':email'   => $payload['email'] ?? '',
+                ':state'   => $payload['state'] ?? '',
+                ':product' => $payload['product'] ?? '',
+                ':amount'  => floatval($payload['amount'] ?? 0),
+                ':message' => $payload['message'] ?? '',
+                ':ip'      => $payload['ip_address'] ?? ''
+            ]);
+        } elseif ($action === 'grievance') {
+            $stmt = $pdo->prepare("
+                INSERT INTO grievances (id, name, phone, category, details, ip_address)
+                VALUES (:id, :name, :phone, :category, :details, :ip)
+            ");
+            $stmt->execute([
+                ':id'       => $payload['id'],
+                ':name'     => $payload['name'] ?? '',
+                ':phone'    => $payload['phone'] ?? '',
+                ':category' => $payload['category'] ?? '',
+                ':details'  => $payload['details'] ?? '',
+                ':ip'       => $payload['ip_address'] ?? ''
+            ]);
+        } else {
+            $stmt = $pdo->prepare("
+                INSERT INTO contacts (id, name, email, phone, message, ip_address)
+                VALUES (:id, :name, :email, :phone, :message, :ip)
+            ");
+            $stmt->execute([
+                ':id'      => $payload['id'],
+                ':name'    => $payload['name'] ?? '',
+                ':email'   => $payload['email'] ?? '',
+                ':phone'   => $payload['phone'] ?? '',
+                ':message' => $payload['message'] ?? '',
+                ':ip'      => $payload['ip_address'] ?? ''
+            ]);
+        }
+    }
+} catch (Exception $e) {
+    error_log("SQLite Insert Error: " . $e->getMessage());
+}
+
+// 3.2 JSON File Backup
 $submissions = [];
 if (file_exists(SUBMISSIONS_FILE)) {
     $existing = @file_get_contents(SUBMISSIONS_FILE);
