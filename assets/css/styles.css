@@ -1697,6 +1697,106 @@ textarea.form-control {
 }
 
 /* ----------------------------------------------------------
+   19.1 WHATSAPP WIDGETS & BUTTONS
+   ---------------------------------------------------------- */
+.whatsapp-float {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    z-index: 995;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: var(--radius-full);
+    box-shadow: 0 10px 25px rgba(18, 140, 126, 0.35);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    animation: whatsappPulse 2.8s infinite;
+}
+
+.whatsapp-float:hover {
+    color: #ffffff;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 30px rgba(18, 140, 126, 0.45);
+}
+
+.whatsapp-float svg {
+    flex-shrink: 0;
+}
+
+.whatsapp-float-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.whatsapp-float-text .status-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #d1fae5;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.whatsapp-float-text .status-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6ee7b7;
+}
+
+.btn-whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #ffffff !important;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.28);
+}
+
+.btn-whatsapp:hover {
+    background: linear-gradient(135deg, #1ebe5d, #0e7266);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.38);
+}
+
+.form-actions-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+    .whatsapp-float {
+        bottom: 20px;
+        left: 20px;
+        padding: 12px;
+        border-radius: 50%;
+    }
+
+    .whatsapp-float-text {
+        display: none;
+    }
+
+    .form-actions-split {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ----------------------------------------------------------
    20. RESPONSIVE DESIGN (BREAKPOINTS)
    ---------------------------------------------------------- */
 @media (max-width: 1024px) {

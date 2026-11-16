@@ -120,6 +120,35 @@ Open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
+## 💬 WhatsApp Integration & Automated Alerts
+
+This site includes a complete **100% Free** WhatsApp integration for both visitors and administrators:
+
+### 1. Floating WhatsApp Quick-Chat Widget
+- A floating chat pill is pinned to the bottom-left corner across all pages.
+- Allows visitors to immediately chat with Sarvocch Microcare's official WhatsApp number (`+91 91111 99101`).
+
+### 2. Form Direct-to-WhatsApp Forwarding
+- When users submit the **Loan Enquiry Form** or **Contact Form**, they can choose between standard submission or **"Apply via WhatsApp"**.
+- Upon submission, their input is sent to the server (saving a backup and emailing the office) **AND** generates a pre-formatted WhatsApp message directly to your team with all borrower fields (Name, Phone, State, Product, Amount, and Purpose).
+
+### 3. Free Instant WhatsApp Notifications to Admin's Phone (CallMeBot)
+You can receive an instant WhatsApp alert on your phone whenever any visitor submits a form:
+1. From your personal/admin WhatsApp, send this message:
+   ```text
+   I allow callmebot to send me messages
+   ```
+   to **`+34 924 57 28 40`** (or open [CallMeBot Instructions](https://www.callmebot.com/blog/free-api-whatsapp-messages/)).
+2. CallMeBot will reply with your free API Key within 5 seconds.
+3. Open `api/submit.php` and set your key:
+   ```php
+   define('CALLMEBOT_ADMIN_PHONE', '919111199101'); // Your WhatsApp number
+   define('CALLMEBOT_API_KEY', 'YOUR_API_KEY_HERE'); // Free API key
+   ```
+4. Save the file. Every new loan enquiry or grievance will now instantly buzz on your WhatsApp phone!
+
+---
+
 ## 📧 Form Email Configuration
 
 In `api/submit.php`:
