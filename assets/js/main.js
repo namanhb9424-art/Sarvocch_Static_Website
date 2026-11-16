@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initStatsCounter();
     initLoanCalculator();
+    initLeadershipCarousel();
     initFAQ();
     initForms();
     initBackToTop();
@@ -614,4 +615,93 @@ function initBackToTop() {
     });
 
     updateProgress();
+}
+
+/* ----------------------------------------------------------
+   10. LEADERSHIP CAROUSEL
+   ---------------------------------------------------------- */
+function initLeadershipCarousel() {
+    const carousel = document.getElementById('leaderCarousel');
+    const prevBtn = document.getElementById('leaderPrev');
+    const nextBtn = document.getElementById('leaderNext');
+    const dots = document.querySelectorAll('#leaderDots .carousel-dot');
+    const counterCurrent = document.querySelector('#leaderCounter .current-slide');
+    const slides = document.querySelectorAll('.leadership-track .carousel-slide');
+
+    if (!carousel || !prevBtn || !nextBtn || slides.length === 0) return;
+
+    const totalSlides = slides.length;
+
+    const getSlideStep = () => {
+        if (!slides[0]) return 300;
+        const style = window.getComputedStyle(carousel.querySelector('.leadership-track'));
+        const gap = parseFloat(style.gap || '36') || 36;
+        return slides[0].getBoundingClientRect().width + gap;
+    };
+
+    const updateUI = () => {
+        const scrollLeft = carousel.scrollLeft;
+        const slideStep = getSlideStep();
+        let currentIndex = Math.round(scrollLeft / slideStep);
+        if (currentIndex < 0) currentIndex = 0;
+        if (currentIndex >= totalSlides) currentIndex = totalSlides - 1;
+
+        // Update dots
+        dots.forEach((dot, idx) => {
+            if (idx === currentIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+
+        // Update counter
+        if (counterCurrent) {
+            counterCurrent.textContent = String(currentIndex + 1).padStart(2, '0');
+        }
+
+        // Update button states
+        prevBtn.disabled = scrollLeft <= 8;
+        const maxScroll = carousel.scrollWidth - carousel.clientWidth - 8;
+        nextBtn.disabled = scrollLeft >= maxScroll;
+    };
+
+    prevBtn.addEventListener('click', () => {
+        const slideStep = getSlideStep();
+        carousel.scrollBy({ left: -slideStep, behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', () => {
+        const slideStep = getSlideStep();
+        carousel.scrollBy({ left: slideStep, behavior: 'smooth' });
+    });
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            const index = parseInt(dot.getAttribute('data-index'), 10);
+            const slideStep = getSlideStep();
+            carousel.scrollTo({ left: index * slideStep, behavior: 'smooth' });
+        });
+    });
+
+    // Support keyboard arrow navigation when carousel is focused
+    carousel.setAttribute('tabindex', '0');
+    carousel.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            const slideStep = getSlideStep();
+            carousel.scrollBy({ left: -slideStep, behavior: 'smooth' });
+        } else if (e.key === 'ArrowRight') {
+            const slideStep = getSlideStep();
+            carousel.scrollBy({ left: slideStep, behavior: 'smooth' });
+        }
+    });
+
+    carousel.addEventListener('scroll', () => {
+        window.requestAnimationFrame(updateUI);
+    }, { passive: true });
+
+    window.addEventListener('resize', updateUI);
+
+    // Initial state
+    updateUI();
 }

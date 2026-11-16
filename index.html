@@ -513,42 +513,131 @@
                     </p>
                 </div>
 
-                <div class="leadership-grid">
-                    <!-- Director: Pushpraj Singh -->
-                    <div class="leader-card card-interactive reveal delay-100">
-                        <div class="leader-photo-wrapper">
-                            <img src="assets/images/pushpraj-singh.jpg.jpeg" alt="Pushpraj Singh - Director" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                            <div class="leader-initials-fallback" style="display:none;">PS</div>
+                <!-- LEADERSHIP CAROUSEL -->
+                <div class="leadership-carousel-wrapper reveal">
+                    <!-- Carousel Controls Header -->
+                    <div class="carousel-header">
+                        <div class="carousel-counter" id="leaderCounter">
+                            <span class="current-slide">01</span> / <span class="total-slides">05</span>
                         </div>
-                        <div class="leader-details">
-                            <span class="leader-designation-badge">Director</span>
-                            <h3 class="leader-name">Pushpraj Singh</h3>
-                            <p class="leader-bio">
-                                Pushpraj Singh serves as Director of Sarvocch Microcare Foundation. He contributes to strategic planning, institutional development, responsible financial practices, and transparent organisational operations across regional offices.
-                            </p>
-                            <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                <span>sarvocchmicrocare@gmail.com</span>
-                            </a>
+                        <div class="carousel-controls">
+                            <button type="button" class="carousel-btn prev-btn" id="leaderPrev" aria-label="Previous leader">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <button type="button" class="carousel-btn next-btn" id="leaderNext" aria-label="Next leader">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Managing Director: Bandna Singh -->
-                    <div class="leader-card card-interactive reveal delay-200">
-                        <div class="leader-photo-wrapper">
-                            <img src="assets/images/bandna-singh.jpg.jpeg" alt="Bandna Singh - Managing Director" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                            <div class="leader-initials-fallback" style="display:none;">BS</div>
+                    <!-- Carousel Track Container -->
+                    <div class="leadership-carousel" id="leaderCarousel" tabindex="0" aria-label="Leadership Team Carousel">
+                        <div class="leadership-track" id="leaderTrack">
+                            <!-- Leader 1: Bandna Singh (CEO) -->
+                            <div class="leader-card card-interactive carousel-slide">
+                                <div class="leader-photo-wrapper">
+                                    <img src="assets/images/bandana-singh-ceo.jpg" alt="Bandna Singh - Chief Executive Officer" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="leader-initials-fallback" style="display:none;">BS</div>
+                                </div>
+                                <div class="leader-details">
+                                    <span class="leader-designation-badge">Chief Executive Officer (CEO)</span>
+                                    <h3 class="leader-name">Bandna Singh</h3>
+                                    <p class="leader-bio">
+                                        Bandna Singh serves as Chief Executive Officer (CEO) of Sarvocch Microcare Foundation. She spearheads organizational vision, executive governance, grassroots financial inclusion, customer relationships, and strategic institutional development.
+                                    </p>
+                                    <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        <span>sarvocchmicrocare@gmail.com</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Leader 2: Pushpraj Singh (Director) -->
+                            <div class="leader-card card-interactive carousel-slide">
+                                <div class="leader-photo-wrapper">
+                                    <img src="assets/images/pushpraj-singh.jpg.jpeg" alt="Pushpraj Singh - Director" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="leader-initials-fallback" style="display:none;">PS</div>
+                                </div>
+                                <div class="leader-details">
+                                    <span class="leader-designation-badge">Director</span>
+                                    <h3 class="leader-name">Pushpraj Singh</h3>
+                                    <p class="leader-bio">
+                                        Pushpraj Singh serves as Director of Sarvocch Microcare Foundation. He contributes to strategic planning, institutional governance, responsible lending frameworks, and transparent organisational operations across regional offices.
+                                    </p>
+                                    <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        <span>sarvocchmicrocare@gmail.com</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Leader 3: Abhinav Raisa (Vice President) -->
+                            <div class="leader-card card-interactive carousel-slide">
+                                <div class="leader-photo-wrapper">
+                                    <img src="assets/images/abhinav-raisa.jpg" alt="Abhinav Raisa - Vice President" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="leader-initials-fallback" style="display:none;">AR</div>
+                                </div>
+                                <div class="leader-details">
+                                    <span class="leader-designation-badge">Vice President</span>
+                                    <h3 class="leader-name">Abhinav Raisa</h3>
+                                    <p class="leader-bio">
+                                        Abhinav Raisa serves as Vice President at Sarvocch Microcare Foundation, overseeing strategic operations, branch administration, loan portfolio performance, and client engagement systems across our growing network.
+                                    </p>
+                                    <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        <span>sarvocchmicrocare@gmail.com</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Leader 4: Tapan Dubey (Assistant Vice President) -->
+                            <div class="leader-card card-interactive carousel-slide">
+                                <div class="leader-photo-wrapper">
+                                    <img src="assets/images/tapan-dubey.jpg" alt="Tapan Dubey - Assistant Vice President" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="leader-initials-fallback" style="display:none;">TD</div>
+                                </div>
+                                <div class="leader-details">
+                                    <span class="leader-designation-badge">Assistant Vice President</span>
+                                    <h3 class="leader-name">Tapan Dubey</h3>
+                                    <p class="leader-bio">
+                                        Tapan Dubey serves as Assistant Vice President, leading regional portfolio management, risk evaluation, regulatory compliance, and community outreach operations across Madhya Pradesh.
+                                    </p>
+                                    <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        <span>sarvocchmicrocare@gmail.com</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Leader 5: Yogesh Rajput (Assistant Vice President) -->
+                            <div class="leader-card card-interactive carousel-slide">
+                                <div class="leader-photo-wrapper">
+                                    <img src="assets/images/yogesh-rajput.jpg" alt="Yogesh Rajput - Assistant Vice President" class="leader-photo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="leader-initials-fallback" style="display:none;">YR</div>
+                                </div>
+                                <div class="leader-details">
+                                    <span class="leader-designation-badge">Assistant Vice President</span>
+                                    <h3 class="leader-name">Yogesh Rajput</h3>
+                                    <p class="leader-bio">
+                                        Yogesh Rajput serves as Assistant Vice President, managing field operations, customer grievance mechanisms, branch coordination, and grassroots financial literacy initiatives.
+                                    </p>
+                                    <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        <span>sarvocchmicrocare@gmail.com</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="leader-details">
-                            <span class="leader-designation-badge">Managing Director</span>
-                            <h3 class="leader-name">Bandna Singh</h3>
-                            <p class="leader-bio">
-                                Bandna Singh serves as Managing Director of Sarvocch Microcare Foundation. She focuses on organisational leadership, operational management, customer relationships, grassroots financial inclusion, and sustainable institutional development.
-                            </p>
-                            <a href="mailto:sarvocchmicrocare@gmail.com" class="leader-email-link">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                <span>sarvocchmicrocare@gmail.com</span>
-                            </a>
+                    </div>
+
+                    <!-- Carousel Dots Indicator -->
+                    <div class="carousel-dots-wrapper">
+                        <div class="carousel-dots" id="leaderDots">
+                            <button type="button" class="carousel-dot active" data-index="0" aria-label="Slide 1"></button>
+                            <button type="button" class="carousel-dot" data-index="1" aria-label="Slide 2"></button>
+                            <button type="button" class="carousel-dot" data-index="2" aria-label="Slide 3"></button>
+                            <button type="button" class="carousel-dot" data-index="3" aria-label="Slide 4"></button>
+                            <button type="button" class="carousel-dot" data-index="4" aria-label="Slide 5"></button>
                         </div>
                     </div>
                 </div>
@@ -557,10 +646,13 @@
                     <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-heading); margin-bottom: 6px;">Management Hierarchy</h3>
                     <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 24px;">Proposed organisational reporting structure</p>
 
-                    <div class="hierarchy-item">Board of Directors</div>
-                    <div class="hierarchy-item">Managing Director</div>
-                    <div class="hierarchy-item">Director</div>
-                    <div class="hierarchy-item">Vice President</div>
+                    <div class="hierarchy-list">
+                        <div class="hierarchy-item">Board of Directors</div>
+                        <div class="hierarchy-item">Chief Executive Officer (CEO)</div>
+                        <div class="hierarchy-item">Director</div>
+                        <div class="hierarchy-item">Vice President</div>
+                        <div class="hierarchy-item">Assistant Vice President</div>
+                    </div>
                 </div>
 
                 <div class="notice-box reveal">

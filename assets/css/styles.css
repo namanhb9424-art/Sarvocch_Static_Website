@@ -981,10 +981,102 @@ img, svg {
 /* ----------------------------------------------------------
    12. LEADERSHIP SECTION
    ---------------------------------------------------------- */
-.leadership-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+.leadership-carousel-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0 4px;
+}
+
+.carousel-counter {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.carousel-counter .current-slide {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.carousel-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.carousel-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--text-heading);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carousel-btn:hover:not(:disabled) {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 119, 182, 0.25);
+}
+
+.carousel-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.leadership-carousel {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 8px 4px 18px;
+    margin: -8px -4px -18px;
+}
+
+.leadership-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.leadership-track {
+    display: flex;
     gap: 36px;
+}
+
+.carousel-slide {
+    flex: 0 0 calc(50% - 18px);
+    min-width: calc(50% - 18px);
+    max-width: calc(50% - 18px);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 860px) {
+    .carousel-slide {
+        flex: 0 0 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
 }
 
 .leader-card {
@@ -994,6 +1086,9 @@ img, svg {
     overflow: hidden;
     box-shadow: var(--shadow-md);
     transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .leader-photo-wrapper {
@@ -1002,6 +1097,7 @@ img, svg {
     background: linear-gradient(135deg, var(--bg-ice) 0%, #dbeafe 100%);
     overflow: hidden;
     position: relative;
+    flex-shrink: 0;
 }
 
 .leader-photo-img {
@@ -1030,9 +1126,13 @@ img, svg {
 
 .leader-details {
     padding: 28px 26px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .leader-designation-badge {
+    align-self: flex-start;
     display: inline-block;
     padding: 4px 12px;
     background: var(--bg-ice);
@@ -1057,6 +1157,7 @@ img, svg {
     color: var(--text-muted);
     line-height: 1.65;
     margin-bottom: 18px;
+    flex-grow: 1;
 }
 
 .leader-email-link {
@@ -1067,10 +1168,43 @@ img, svg {
     color: var(--primary);
     font-weight: 600;
     word-break: break-all;
+    margin-top: auto;
 }
 
 .leader-email-link:hover {
     text-decoration: underline;
+}
+
+.carousel-dots-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+}
+
+.carousel-dots {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(241, 245, 249, 0.9);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+}
+
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 0;
+}
+
+.carousel-dot.active {
+    width: 28px;
+    background: var(--primary);
+    border-radius: var(--radius-full);
 }
 
 /* Management Hierarchy Tree */
@@ -1080,13 +1214,20 @@ img, svg {
     text-align: center;
 }
 
+.hierarchy-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
 .hierarchy-item {
     background: #ffffff;
     border: 1px solid var(--border);
     border-left: 5px solid var(--primary);
     border-radius: var(--radius-md);
     padding: 14px 24px;
-    margin: 12px auto;
+    margin: 8px auto;
     font-weight: 700;
     color: var(--text-heading);
     box-shadow: var(--shadow-sm);
@@ -1098,10 +1239,11 @@ img, svg {
     box-shadow: var(--shadow-md);
 }
 
-.hierarchy-item:nth-child(1) { width: 95%; }
-.hierarchy-item:nth-child(2) { width: 88%; }
-.hierarchy-item:nth-child(3) { width: 80%; }
-.hierarchy-item:nth-child(4) { width: 72%; }
+.hierarchy-list .hierarchy-item:nth-child(1) { width: 95%; }
+.hierarchy-list .hierarchy-item:nth-child(2) { width: 88%; }
+.hierarchy-list .hierarchy-item:nth-child(3) { width: 81%; }
+.hierarchy-list .hierarchy-item:nth-child(4) { width: 74%; }
+.hierarchy-list .hierarchy-item:nth-child(5) { width: 67%; }
 
 /* ----------------------------------------------------------
    13. BRANCH DIRECTORY SECTION
