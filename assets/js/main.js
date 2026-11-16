@@ -343,13 +343,58 @@ function initFAQ() {
 }
 
 /* ----------------------------------------------------------
-   8. FORMS VALIDATION & AJAX SUBMISSION
+   8. FORMS VALIDATION & AJAX SUBMISSION WITH WHATSAPP
    ---------------------------------------------------------- */
 function initForms() {
+    const WHATSAPP_PHONE = '919111199101';
+
+    const getFormDataObj = (form) => {
+        const data = {};
+        new FormData(form).forEach((value, key) => {
+            data[key] = value;
+        });
+        return data;
+    };
+
+    const buildWhatsAppUrl = (formType, data, refId = '') => {
+        let text = '';
+        const idTag = refId ? `\nRef ID: #${refId.slice(-8)}` : '';
+
+        if (formType === 'loan_enquiry') {
+            text = `👋 *New Loan Enquiry - Sarvocch Microcare*\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                   `👤 *Name:* ${data.name || ''}\n` +
+                   `📱 *Phone:* ${data.phone || ''}\n` +
+                   `📍 *State:* ${data.state || ''}\n` +
+                   `💼 *Product:* ${data.loan_type || 'General Enquiry'}\n` +
+                   `💰 *Amount:* ₹${data.amount || 'To be discussed'}\n` +
+                   `📝 *Purpose:* ${data.message || 'Livelihood finance'}\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━${idTag}`;
+        } else if (formType === 'grievance') {
+            text = `⚠️ *Customer Grievance - Sarvocch Microcare*\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                   `👤 *Complainant:* ${data.name || ''}\n` +
+                   `📱 *Phone:* ${data.phone || ''}\n` +
+                   `📂 *Category:* ${data.category || ''}\n` +
+                   `📝 *Details:* ${data.details || ''}\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━${idTag}`;
+        } else {
+            text = `💬 *Contact Message - Sarvocch Microcare*\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                   `👤 *Name:* ${data.name || ''}\n` +
+                   `📧 *Email:* ${data.email || ''}\n` +
+                   `📱 *Phone:* ${data.phone || 'N/A'}\n` +
+                   `📝 *Message:* ${data.message || ''}\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━${idTag}`;
+        }
+
+        return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+    };
+
     const forms = [
-        { id: 'loanForm', successMsg: 'Your Loan Enquiry has been submitted successfully. Our team will contact you shortly.' },
-        { id: 'grievanceForm', successMsg: 'Your grievance complaint has been logged. Our Grievance Officer will review your submission.' },
-        { id: 'contactForm', successMsg: 'Thank you for reaching out. Your message has been sent to our Bhopal office.' }
+        { id: 'loanForm', type: 'loan_enquiry', successMsg: 'Your Loan Enquiry has been submitted. Our team will contact you shortly.' },
+        { id: 'grievanceForm', type: 'grievance', successMsg: 'Your grievance complaint has been logged. Our Grievance Officer will review your submission.' },
+        { id: 'contactForm', type: 'contact', successMsg: 'Thank you for reaching out. Your message has been sent to our Bhopal office.' }
     ];
 
     forms.forEach(cfg => {
@@ -364,6 +409,13 @@ function initForms() {
             });
         }
 
+        let clickedSubmitter = null;
+        form.querySelectorAll('button[type="submit"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                clickedSubmitter = btn;
+            });
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -373,13 +425,14 @@ function initForms() {
                 return;
             }
 
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Submit';
+            const submitter = clickedSubmitter || e.submitter || form.querySelector('button[type="submit"]');
+            const isWhatsAppClick = submitter && submitter.classList.contains('btn-whatsapp');
+            const originalBtnText = submitter ? submitter.innerHTML : 'Submit';
 
             // Loading state
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `
+            if (submitter) {
+                submitter.disabled = true;
+                submitter.innerHTML = `
                     <svg class="btn-spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
                         <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
                         <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
@@ -389,6 +442,7 @@ function initForms() {
             }
 
             const formData = new FormData(form);
+            const dataObj = getFormDataObj(form);
 
             try {
                 // Submit to PHP endpoint
@@ -408,21 +462,46 @@ function initForms() {
                 }
 
                 if (result.success || response.ok) {
-                    showToast('Submission Received', result.message || cfg.successMsg, 'success');
+                    const waUrl = result.whatsapp_url || buildWhatsAppUrl(cfg.type, dataObj, result.id || '');
+                    
+                    showToast(
+                        'Submission Received',
+                        result.message || cfg.successMsg,
+                        'success',
+                        { text: 'Continue on WhatsApp 💬', url: waUrl }
+                    );
+
+                    if (isWhatsAppClick) {
+                        window.open(waUrl, '_blank');
+                    }
+
                     form.reset();
                 } else {
                     showToast('Notice', result.message || 'Submission could not be completed. Please try again or reach out directly by phone.', 'error');
                 }
             } catch (err) {
-                // If running locally without PHP web server, show helpful demo confirmation
+                // Local fallback / demo mode
                 console.warn('Backend endpoint unavailable. Simulating client demo success:', err);
-                showToast('Enquiry Received (Demo Mode)', cfg.successMsg, 'success');
+                const waUrl = buildWhatsAppUrl(cfg.type, dataObj);
+                
+                showToast(
+                    'Enquiry Received (Demo Mode)',
+                    cfg.successMsg,
+                    'success',
+                    { text: 'Chat on WhatsApp 💬', url: waUrl }
+                );
+
+                if (isWhatsAppClick) {
+                    window.open(waUrl, '_blank');
+                }
+
                 form.reset();
             } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
+                if (submitter) {
+                    submitter.disabled = false;
+                    submitter.innerHTML = originalBtnText;
                 }
+                clickedSubmitter = null;
             }
         });
     });
@@ -431,7 +510,7 @@ function initForms() {
 /* ----------------------------------------------------------
    9. TOAST NOTIFICATION COMPONENT
    ---------------------------------------------------------- */
-function showToast(title, message, type = 'success') {
+function showToast(title, message, type = 'success', actionBtn = null) {
     let container = document.querySelector('.toast-container');
     if (!container) {
         container = document.createElement('div');
@@ -446,11 +525,23 @@ function showToast(title, message, type = 'success') {
         ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
         : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
 
+    let actionHtml = '';
+    if (actionBtn && actionBtn.url) {
+        actionHtml = `
+            <div style="margin-top: 10px;">
+                <a href="${actionBtn.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-whatsapp" style="text-decoration:none;">
+                    ${escapeHTML(actionBtn.text || 'Open WhatsApp')}
+                </a>
+            </div>
+        `;
+    }
+
     toast.innerHTML = `
         <div class="toast-icon">${iconSvg}</div>
-        <div class="toast-content">
+        <div class="toast-content" style="flex:1;">
             <strong>${escapeHTML(title)}</strong>
             <p>${escapeHTML(message)}</p>
+            ${actionHtml}
         </div>
         <button class="toast-close" aria-label="Close notification">&times;</button>
     `;
@@ -464,8 +555,9 @@ function showToast(title, message, type = 'success') {
 
     toast.querySelector('.toast-close').addEventListener('click', removeToast);
 
-    // Auto dismiss after 5 seconds
-    setTimeout(removeToast, 5000);
+    // Auto dismiss after 7 seconds if actionBtn present, else 5 seconds
+    const timeoutDuration = actionBtn ? 7000 : 5000;
+    setTimeout(removeToast, timeoutDuration);
 }
 
 function escapeHTML(str) {

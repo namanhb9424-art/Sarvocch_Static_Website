@@ -3,17 +3,37 @@
  * Sarvocch Microcare Foundation - Form Submission Endpoint
  * Designed for Hostinger Premium Web Hosting (PHP 7.4 - 8.3+)
  * Handles: Loan Enquiry, Grievance Complaints, General Contact
+ * Includes: WhatsApp Direct Forwarding, Free CallMeBot & Telegram Admin Alerts
  */
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Configuration
+// ==========================================================
+// 1. CONFIGURATION
+// ==========================================================
 define('ADMIN_EMAIL', 'sarvocchmicrocare@gmail.com');
 define('SITE_NAME', 'Sarvocch Microcare Foundation');
 define('DATA_DIR', __DIR__ . '/../data');
+define('DB_FILE', DATA_DIR . '/sarvocch.db');
 define('SUBMISSIONS_FILE', DATA_DIR . '/submissions.json');
 
-// Only allow POST
+// Official WhatsApp Business Number for Customers to chat with
+define('WHATSAPP_BUSINESS_PHONE', '919111199101');
+
+// Optional: Free Instant WhatsApp Notifications to Admin's phone via CallMeBot
+// How to activate in 10 seconds:
+// Send message "I allow callmebot to send me messages" to +34 924 57 28 40 on WhatsApp
+// Enter the returned API key below.
+define('CALLMEBOT_ADMIN_PHONE', '919111199101'); // Your WhatsApp number with country code (91...)
+define('CALLMEBOT_API_KEY', '');                 // Enter your free CallMeBot API key here
+
+// Optional: Free Telegram Bot Notification (leave empty if not using)
+define('TELEGRAM_BOT_TOKEN', '');
+define('TELEGRAM_CHAT_ID', '');
+
+// ==========================================================
+// 2. REQUEST VALIDATION
+// ==========================================================
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
@@ -25,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Honeypot check for spam bots
 if (!empty($_POST['website_hp'])) {
-    // Silent success for spam bots
     echo json_encode([
         'success' => true,
         'message' => 'Your request has been processed.'
@@ -74,6 +93,17 @@ if ($action === 'loan_enquiry') {
     $payload += compact('name', 'phone', 'email', 'state', 'product', 'amount', 'message');
     $subject = "New Loan Enquiry: {$name} (₹{$amount})";
 
+    $wa_text = "👋 *New Loan Enquiry - Sarvocch Microcare*\n" .
+               "━━━━━━━━━━━━━━━━━━━━━━\n" .
+               "👤 *Name:* " . $name . "\n" .
+               "📱 *Phone:* " . $phone . "\n" .
+               "📍 *State:* " . $state . "\n" .
+               "💼 *Product:* " . ($product ?: 'General Enquiry') . "\n" .
+               "💰 *Amount:* ₹" . ($amount ?: 'To be discussed') . "\n" .
+               "📝 *Purpose:* " . ($message ?: 'Livelihood finance') . "\n" .
+               "━━━━━━━━━━━━━━━━━━━━━━\n" .
+               "Ref ID: #" . substr($payload['id'], -8);
+
 } elseif ($action === 'grievance') {
     $name     = clean_input($_POST['name'] ?? '', 100);
     $phone    = clean_input($_POST['phone'] ?? '', 15);
@@ -90,6 +120,15 @@ if ($action === 'loan_enquiry') {
     $payload += compact('name', 'phone', 'category', 'details');
     $subject = "Grievance Complaint Logged: {$name} [{$category}]";
 
+    $wa_text = "⚠️ *Customer Grievance Logged - Sarvocch Microcare*\n" .
+               "━━━━━━━━━━━━━━━━━━━━━━\n" .
+               "👤 *Complainant:* " . $name . "\n" .
+               "📱 *Phone:* " . $phone . "\n" .
+               "📂 *Category:* " . $category . "\n" .
+               "📝 *Details:* " . $details . "\n" .
+               "━━━━━━━━━━━━━━━━━━━━━━\n" .
+               "Grievance ID: #" . substr($payload['id'], -8);
+
 } else { // contact
     $name    = clean_input($_POST['name'] ?? '', 100);
     $email   = clean_input($_POST['email'] ?? '', 120);
@@ -104,6 +143,15 @@ if ($action === 'loan_enquiry') {
 
     $payload += compact('name', 'email', 'phone', 'message');
     $subject = "Website Contact Message from {$name}";
+
+    $wa_text = "💬 *Contact Message - Sarvocch Microcare*\n" .
+               "━━━━━━━━━━━━━━━━━━━━━━\n" .
+               "👤 *Name:* " . $name . "\n" .
+               "📧 *Email:* " . $email . "\n" .
+               "📱 *Phone:* " . ($phone ?: 'N/A') . "\n" .
+               "📝 *Message:* " . $message . "\n" .
+               "━━━━━━━━━━━━━━━━━━━━━━\n" .
+               "Ref ID: #" . substr($payload['id'], -8);
 }
 
 // Return errors if any
@@ -116,11 +164,105 @@ if (!empty($errors)) {
     exit;
 }
 
-// 1. Save to local data store
+// ==========================================================
+// 3. PERSIST SUBMISSION TO SQLITE DATABASE & JSON BACKUP
+// ==========================================================
 if (!is_dir(DATA_DIR)) {
     @mkdir(DATA_DIR, 0755, true);
 }
 
+// 3.1 SQLite Database Insertion
+try {
+    if (class_exists('PDO')) {
+        $pdo = new PDO('sqlite:' . DB_FILE);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Ensure tables exist
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS loan_enquiries (
+                id TEXT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                email TEXT,
+                state TEXT NOT NULL,
+                product TEXT,
+                amount REAL,
+                message TEXT,
+                ip_address TEXT,
+                status TEXT DEFAULT 'NEW'
+            );
+            CREATE TABLE IF NOT EXISTS grievances (
+                id TEXT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                category TEXT NOT NULL,
+                details TEXT NOT NULL,
+                ip_address TEXT,
+                status TEXT DEFAULT 'OPEN'
+            );
+            CREATE TABLE IF NOT EXISTS contacts (
+                id TEXT PRIMARY KEY,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                message TEXT NOT NULL,
+                ip_address TEXT,
+                status TEXT DEFAULT 'UNREAD'
+            );
+        ");
+
+        if ($action === 'loan_enquiry') {
+            $stmt = $pdo->prepare("
+                INSERT INTO loan_enquiries (id, name, phone, email, state, product, amount, message, ip_address)
+                VALUES (:id, :name, :phone, :email, :state, :product, :amount, :message, :ip)
+            ");
+            $stmt->execute([
+                ':id'      => $payload['id'],
+                ':name'    => $payload['name'] ?? '',
+                ':phone'   => $payload['phone'] ?? '',
+                ':email'   => $payload['email'] ?? '',
+                ':state'   => $payload['state'] ?? '',
+                ':product' => $payload['product'] ?? '',
+                ':amount'  => floatval($payload['amount'] ?? 0),
+                ':message' => $payload['message'] ?? '',
+                ':ip'      => $payload['ip_address'] ?? ''
+            ]);
+        } elseif ($action === 'grievance') {
+            $stmt = $pdo->prepare("
+                INSERT INTO grievances (id, name, phone, category, details, ip_address)
+                VALUES (:id, :name, :phone, :category, :details, :ip)
+            ");
+            $stmt->execute([
+                ':id'       => $payload['id'],
+                ':name'     => $payload['name'] ?? '',
+                ':phone'    => $payload['phone'] ?? '',
+                ':category' => $payload['category'] ?? '',
+                ':details'  => $payload['details'] ?? '',
+                ':ip'       => $payload['ip_address'] ?? ''
+            ]);
+        } else {
+            $stmt = $pdo->prepare("
+                INSERT INTO contacts (id, name, email, phone, message, ip_address)
+                VALUES (:id, :name, :email, :phone, :message, :ip)
+            ");
+            $stmt->execute([
+                ':id'      => $payload['id'],
+                ':name'    => $payload['name'] ?? '',
+                ':email'   => $payload['email'] ?? '',
+                ':phone'   => $payload['phone'] ?? '',
+                ':message' => $payload['message'] ?? '',
+                ':ip'      => $payload['ip_address'] ?? ''
+            ]);
+        }
+    }
+} catch (Exception $e) {
+    error_log("SQLite Insert Error: " . $e->getMessage());
+}
+
+// 3.2 JSON File Backup
 $submissions = [];
 if (file_exists(SUBMISSIONS_FILE)) {
     $existing = @file_get_contents(SUBMISSIONS_FILE);
@@ -130,13 +272,14 @@ if (file_exists(SUBMISSIONS_FILE)) {
     }
 }
 $submissions[] = $payload;
-// Keep the last 500 entries to prevent runaway file size
 if (count($submissions) > 500) {
     $submissions = array_slice($submissions, -500);
 }
 @file_put_contents(SUBMISSIONS_FILE, json_encode($submissions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
 
-// 2. Prepare HTML Email for Admin
+// ==========================================================
+// 4. EMAIL NOTIFICATION
+// ==========================================================
 $email_body = "
 <!DOCTYPE html>
 <html>
@@ -186,10 +329,32 @@ if (!empty($payload['email']) && filter_var($payload['email'], FILTER_VALIDATE_E
     $headers[] = 'Reply-To: ' . $payload['email'];
 }
 
-// Send Mail using Hostinger native PHP mailer
 @mail(ADMIN_EMAIL, $subject, $email_body, implode("\r\n", $headers));
 
-// Response
+// ==========================================================
+// 5. AUTOMATED INSTANT ADMIN ALERTS (CALLMEBOT / TELEGRAM)
+// ==========================================================
+// Free WhatsApp Alert to Admin Phone
+if (!empty(CALLMEBOT_API_KEY) && !empty(CALLMEBOT_ADMIN_PHONE)) {
+    $bot_url = "https://api.callmebot.com/whatsapp.php?phone=" . urlencode(CALLMEBOT_ADMIN_PHONE) .
+               "&text=" . urlencode($wa_text) .
+               "&apikey=" . urlencode(CALLMEBOT_API_KEY);
+    $ctx = stream_context_create(['http' => ['timeout' => 3]]);
+    @file_get_contents($bot_url, false, $ctx);
+}
+
+// Free Telegram Alert (if configured)
+if (!empty(TELEGRAM_BOT_TOKEN) && !empty(TELEGRAM_CHAT_ID)) {
+    $tg_url = "https://api.telegram.org/bot" . TELEGRAM_BOT_TOKEN . "/sendMessage?chat_id=" . urlencode(TELEGRAM_CHAT_ID) . "&text=" . urlencode($wa_text);
+    $ctx = stream_context_create(['http' => ['timeout' => 3]]);
+    @file_get_contents($tg_url, false, $ctx);
+}
+
+// ==========================================================
+// 6. RESPONSE & USER WHATSAPP DEEP-LINK
+// ==========================================================
+$whatsapp_url = "https://wa.me/" . WHATSAPP_BUSINESS_PHONE . "?text=" . urlencode($wa_text);
+
 $success_messages = [
     'loan_enquiry' => 'Thank you! Your loan enquiry has been submitted. Our Bhopal branch team will get in touch with you.',
     'grievance'    => 'Your grievance has been successfully submitted. You will be contacted according to our customer protection guidelines.',
@@ -197,8 +362,10 @@ $success_messages = [
 ];
 
 echo json_encode([
-    'success' => true,
-    'message' => $success_messages[$action] ?? 'Thank you. Your submission was received.',
-    'id'      => $payload['id']
+    'success'      => true,
+    'message'      => $success_messages[$action] ?? 'Thank you. Your submission was received.',
+    'id'           => $payload['id'],
+    'whatsapp_url' => $whatsapp_url,
+    'wa_text'      => $wa_text
 ]);
 exit;
