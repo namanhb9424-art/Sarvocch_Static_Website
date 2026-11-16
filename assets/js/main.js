@@ -634,8 +634,9 @@ function initLeadershipCarousel() {
 
     const getSlideStep = () => {
         if (!slides[0]) return 300;
-        const style = window.getComputedStyle(carousel.querySelector('.leadership-track'));
-        const gap = parseFloat(style.gap || '36') || 36;
+        const track = carousel.querySelector('.leadership-track');
+        const style = window.getComputedStyle(track);
+        const gap = parseFloat(style.gap || '28') || 28;
         return slides[0].getBoundingClientRect().width + gap;
     };
 
@@ -694,6 +695,49 @@ function initLeadershipCarousel() {
             const slideStep = getSlideStep();
             carousel.scrollBy({ left: slideStep, behavior: 'smooth' });
         }
+    });
+
+    // Mouse drag-to-scroll support for desktop
+    let isDown = false;
+    let startX = 0;
+    let scrollLeftStart = 0;
+    let isDragging = false;
+
+    carousel.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDown = true;
+        isDragging = false;
+        carousel.classList.add('is-dragging');
+        startX = e.pageX - carousel.offsetLeft;
+        scrollLeftStart = carousel.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!isDown) return;
+        isDown = false;
+        carousel.classList.remove('is-dragging');
+        setTimeout(() => { isDragging = false; }, 50);
+        updateUI();
+    });
+
+    carousel.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        if (Math.abs(walk) > 6) {
+            isDragging = true;
+        }
+        carousel.scrollLeft = scrollLeftStart - walk;
+    });
+
+    // Prevent inadvertent link clicks when dragging
+    carousel.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+            }
+        });
     });
 
     carousel.addEventListener('scroll', () => {
