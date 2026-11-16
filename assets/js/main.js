@@ -71,6 +71,20 @@ function initMobileNav() {
             toggleMenu();
         }
     });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navMenu.classList.contains('open')) {
+            toggleMenu();
+        }
+    });
+
+    // Auto-close on viewport resize to desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 860 && navMenu.classList.contains('open')) {
+            toggleMenu();
+        }
+    });
 }
 
 /* ----------------------------------------------------------

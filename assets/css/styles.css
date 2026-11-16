@@ -64,6 +64,7 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
 }
 
 body {
@@ -71,7 +72,7 @@ body {
     color: var(--text-body);
     background-color: var(--bg-page);
     line-height: 1.65;
-    overflow-x: hidden;
+    overflow-x: clip;
     position: relative;
 }
 
@@ -2051,44 +2052,148 @@ textarea.form-control {
 }
 
 @media (max-width: 860px) {
+    .header {
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 1000;
+        background: #ffffff;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .nav {
+        min-height: 64px;
+        padding: 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .brand {
+        flex-shrink: 0;
+    }
+
+    .brand-logo {
+        height: 44px;
+        max-width: 170px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+        order: 2;
+    }
+
+    .nav-actions .btn-primary {
+        display: inline-flex;
+        padding: 7px 14px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: var(--radius-full);
+        white-space: nowrap;
+    }
+
+    .nav-actions .btn-icon-right {
+        display: none;
+    }
+
     .menu-toggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 42px;
+        height: 42px;
+        padding: 8px;
+        background: var(--bg-ice);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        order: 3;
+        flex-shrink: 0;
+        transition: var(--transition);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .menu-toggle:hover, .menu-toggle.open {
+        background: #e0f2fe;
+        border-color: var(--primary);
+    }
+
+    .hamburger-line {
         display: block;
+        width: 22px;
+        height: 2px;
+        background-color: var(--primary);
+        margin: 3px 0;
+        transition: var(--transition);
+        border-radius: 2px;
+    }
+
+    .menu-toggle.open .hamburger-line:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .menu-toggle.open .hamburger-line:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle.open .hamburger-line:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
     }
 
     .nav-menu {
         position: fixed;
-        top: 76px;
+        top: 64px;
         left: 0;
         right: 0;
         bottom: 0;
+        height: calc(100vh - 64px);
         background: #ffffff;
         flex-direction: column;
-        align-items: flex-start;
-        padding: 24px 28px;
-        gap: 18px;
-        transform: translateY(-120%);
+        align-items: stretch;
+        padding: 20px 20px 40px;
+        gap: 6px;
+        transform: translateX(100%);
         transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        border-bottom: 1px solid var(--border);
-        box-shadow: var(--shadow-lg);
+        border-top: 1px solid var(--border);
+        box-shadow: -10px 0 25px rgba(0, 0, 0, 0.1);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 999;
     }
 
     .nav-menu.open {
-        transform: translateY(0);
+        transform: translateX(0);
     }
 
     .nav-link {
-        font-size: 1.05rem;
+        font-size: 1rem;
+        font-weight: 700;
         width: 100%;
-        padding: 10px 0;
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
         border-bottom: 1px solid #f1f5f9;
+        color: var(--text-heading);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: var(--transition);
     }
 
-    .nav-actions .btn-primary {
-        display: none;
+    .nav-link:hover, .nav-link.active {
+        background: var(--bg-ice);
+        color: var(--primary);
+        border-bottom-color: transparent;
     }
 
-    .about-grid, .leadership-grid, .branches-grid, .corporate-grid {
+    .about-grid, .branches-grid, .corporate-grid {
         grid-template-columns: 1fr;
     }
 
@@ -2138,9 +2243,5 @@ textarea.form-control {
 
     .calc-container, .form-card, .contact-dark-card, .values-card {
         padding: 24px 18px;
-    }
-
-    .leader-photo-wrapper {
-        height: 320px;
     }
 }
