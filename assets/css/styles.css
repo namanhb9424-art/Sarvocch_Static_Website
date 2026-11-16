@@ -1079,21 +1079,11 @@ img, svg {
 .leadership-track {
     display: flex;
     gap: 28px;
-    width: 100%;
+    align-items: stretch;
 }
 
-/* Fluid adaptive card widths */
-/* Desktop (>= 1100px): 3 cards visible */
-@media (min-width: 1100px) {
-    .carousel-slide {
-        flex: 0 0 calc((100% - 56px) / 3);
-        min-width: calc((100% - 56px) / 3);
-        max-width: calc((100% - 56px) / 3);
-    }
-}
-
-/* Tablet & medium laptop (720px - 1099px): 2 cards visible */
-@media (min-width: 720px) and (max-width: 1099px) {
+/* Adaptive slide sizing: 2 cards on desktop (similar size to original 2 cards), 1 card on tablet & mobile */
+@media (min-width: 900px) {
     .carousel-slide {
         flex: 0 0 calc((100% - 28px) / 2);
         min-width: calc((100% - 28px) / 2);
@@ -1101,8 +1091,7 @@ img, svg {
     }
 }
 
-/* Mobile & Small screens (< 720px): 1 card visible */
-@media (max-width: 719px) {
+@media (max-width: 899px) {
     .leadership-track {
         gap: 16px;
     }
@@ -1115,6 +1104,7 @@ img, svg {
 
 .carousel-slide {
     scroll-snap-align: start;
+    scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
 }
